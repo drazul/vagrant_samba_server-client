@@ -1,0 +1,21 @@
+---
+- hosts: samba-client
+  remote_user: vagrant
+  sudo: yes
+  vars:
+     fstabConfig: "{{ lookup('file', '../templates/fstab') }}"
+
+  tasks:
+    - name: install programs
+      apt: pkg={{ item }}
+      with_items:
+        - smbclient
+        - cifs-utils
+
+    - name: add samba to fstab
+      lineinfile: 
+        dest: "/etc/fstab"
+        line: "{{ fstabConfig }}"
+
+    - name: mount fstab
+      raw: mount -a

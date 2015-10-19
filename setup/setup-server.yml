@@ -1,0 +1,31 @@
+---
+- hosts: samba-server
+  remote_user: vagrant
+  sudo: yes
+  vars:
+     smbConfig: "{{ lookup('file', '../templates/smb.conf') }}"
+
+  tasks:
+
+    - name: change user-group shared dir
+      file: 
+        path: "/home/vagrant/shared"
+        owner: "nobody"
+        group: "nogroup" 
+        mode: "0755"
+
+    - name: install samba
+      apt: 
+        pkg: "samba"
+
+    - name: add samba config
+      lineinfile: 
+        dest: "/etc/samba/smb.conf"
+        line: "{{ smbConfig }}"
+
+    - name: restart samba
+      service: name={{ item }} state=restarted enabled=yes
+      with_items:
+        - smbd
+        - nmbd
+
